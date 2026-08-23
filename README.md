@@ -2,7 +2,7 @@
 
 Go Conference 2026「こだわりを静的解析で表現しよう 90分で作って動かす自作analyzer入門」のハンズオン用リポジトリです。
 
-> Status: Core完成版を実装済み。現在はハンズオン用のstarterとcheckpointへ分割する段階です。
+> この`main` branchは、参加者が当日作業を始めるstarterです。
 
 ## このWorkshopで作るもの
 
@@ -33,9 +33,25 @@ tests := []struct {
 ShippingFee: boundary value 5000 is not tested
 ```
 
-## 現在の完成版を動かす
+## 事前確認
 
-最初に通常のtestとcoverageを確認します。
+codeを変更する前に、すべてのtestが成功することを確認します。
+
+```bash
+go test ./...
+```
+
+次に、まだ診断を実装していないstarterのanalyzerを起動します。
+
+```bash
+go run ./cmd/boundary ./examples/shipping
+```
+
+何も表示されず終了すれば準備完了です。
+
+## Workshopで確認する違和感
+
+題材の通常testとcoverageを確認します。
 
 ```bash
 go test -cover ./examples/shipping
@@ -47,13 +63,13 @@ go test -cover ./examples/shipping
 coverage: 100.0% of statements
 ```
 
-次にanalyzerを実行します。
+WorkshopのStep 3まで完成したanalyzerを実行すると、coverageには現れなかった不足を報告します。
 
 ```bash
 go run ./cmd/boundary ./examples/shipping
 ```
 
-`examples/shipping/shipping_test.go`には`input: 5000`がないため、次の診断と終了status 3が表示されます。
+`examples/shipping/shipping_test.go`には`input: 5000`がないため、完成後は次の診断と終了status 3が表示されます。
 
 ```text
 examples/shipping/shipping.go:4:13: ShippingFee: boundary value 5000 is not tested
@@ -125,9 +141,9 @@ Gitの詳しい操作、GitHub account、ASTや静的解析の事前知識は必
 - 登壇資料: 公開後にlinkを追加
 - 完成版`go-boundary-checker`: https://github.com/Mtsubasa/go-boundary-checker
 
-## 現在の作業
+## checkpoint
 
-Core完成版と自動testは実装済みです。次に次の配布物へ分割します。
+講師による復旧と、実装を先に確認したい場合のために次のbranchを用意します。
 
 - `main`: 参加者が開始するstarter
 - `ex03-complete`: 関数を見つけて報告できるcheckpoint
