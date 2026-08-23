@@ -33,11 +33,34 @@ func run(pass *analysis.Pass) (any, error) {
 	nodeFilter := []ast.Node{(*ast.FuncDecl)(nil)}
 	inspectResult.Preorder(nodeFilter, func(node ast.Node) {
 		function := node.(*ast.FuncDecl)
-		if isTestFile(pass, function.Pos()) {
+		if isTestFile(pass, function.Pos()) || function.Body == nil {
 			return
 		}
 
-		pass.Reportf(function.Name.Pos(), "found function %s", function.Name.Name)
+		ast.Inspect(function.Body, func(node ast.Node) bool {
+			ifStatement, ok := node.(*ast.IfStmt)
+			if !ok {
+				return true
+			}
+
+			comparison, ok := ifStatement.Cond.(*ast.BinaryExpr)
+			if !ok || comparison.Op != token.LSS {
+				return true
+			}
+
+			literal, ok := comparison.Y.(*ast.BasicLit)
+			if !ok || literal.Kind != token.INT {
+				return true
+			}
+
+			pass.Reportf(
+				literal.Pos(),
+				"%s: found boundary value %s",
+				function.Name.Name,
+				literal.Value,
+			)
+			return true
+		})
 	})
 
 	return nil, nil
