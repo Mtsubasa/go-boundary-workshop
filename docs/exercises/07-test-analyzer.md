@@ -4,12 +4,12 @@
 
 手作業で試した1例だけでなく、対応範囲の重要なcaseをfixtureで固定します。
 
-test harnessはstarterに用意します。当日はtest codeを一から書かず、何を固定しているかを読んで実行します。
+test harnessはstarterに用意します。当日はtest codeを一から書かず、何を固定しているかを読んで実行します。preflight時はまだanalyzerが未完成なのでbuild tagで除外しています。
 
 ## 実行する
 
 ```bash
-go test ./boundary -v
+go test -tags workshop_solution ./boundary -v
 ```
 
 ## 固定するcase
@@ -28,8 +28,7 @@ go test ./boundary -v
 
 ## 完了条件
 
-- `go test ./boundary -v`が成功する
+- `go test -tags workshop_solution ./boundary -v`が成功する
 - test caseの追加で診断が消えることを自動testでも確認できた
 
 Coreはここで完成です。全員がExtraへ進む必要はありません。
-

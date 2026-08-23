@@ -149,5 +149,6 @@ Gitの詳しい操作、GitHub account、ASTや静的解析の事前知識は必
 - `ex03-complete`: 関数を見つけて報告できるcheckpoint
 - `ex04-complete`: 境界値を抽出できるcheckpoint
 - `core-complete`: test値との照合まで完成したcheckpoint
+- `types-complete`: named constantとconstant expressionまで扱うExtra完成版
 
 参加者にはbranch切り替えを要求せず、checkpointは講師による復旧と進行の速い参加者向けに使います。
