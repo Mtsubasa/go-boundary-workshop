@@ -2,6 +2,7 @@
 package boundary
 
 import (
+	"go/ast"
 	"go/token"
 	"path/filepath"
 	"strings"
@@ -29,8 +30,15 @@ func run(pass *analysis.Pass) (any, error) {
 		return nil, nil
 	}
 
-	// TODO(Ex3): Find function declarations and report their names.
-	_ = inspectResult
+	nodeFilter := []ast.Node{(*ast.FuncDecl)(nil)}
+	inspectResult.Preorder(nodeFilter, func(node ast.Node) {
+		function := node.(*ast.FuncDecl)
+		if isTestFile(pass, function.Pos()) {
+			return
+		}
+
+		pass.Reportf(function.Name.Pos(), "found function %s", function.Name.Name)
+	})
 
 	return nil, nil
 }
