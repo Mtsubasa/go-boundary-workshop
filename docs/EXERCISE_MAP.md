@@ -23,8 +23,11 @@ Core完成版を実装して実測した後、このmapをもとにstarterとche
 | `ex03-complete` | 関数名の一時診断 | `IfStmt`以下の走査 |
 | `ex04-complete` | 境界値5000の一時診断 | test値の収集と3分類 |
 | `core-complete` | Coreの全診断と自動test | Extraまたは教材の読み進め |
+| `types-complete` | named constantとconstant expression | 一般変数に必要な値追跡を考える |
 
 Core完成版で検証用helperは実装済みだが、すべてを参加者に書かせない。特にfixture読込、整数literalのparse、対応外構文のfilterはstarterで提供する候補とする。
+
+2026-08-23時点で上記5 branchは作成・実測済み。通常参加者は`main`だけを使い、checkpoint branchは講師の復旧用とする。
 
 ## Checkpoint方針
 
