@@ -2,7 +2,7 @@
 
 Go Conference 2026「こだわりを静的解析で表現しよう 90分で作って動かす自作analyzer入門」のハンズオン用リポジトリです。
 
-> Status: Core完成版を実装済み。現在はハンズオン用のstarterとcheckpointへ分割する段階です。
+> この`core-complete` branchは、test値との照合まで実装したCore完成版です。
 
 ## このWorkshopで作るもの
 
@@ -125,13 +125,14 @@ Gitの詳しい操作、GitHub account、ASTや静的解析の事前知識は必
 - 登壇資料: 公開後にlinkを追加
 - 完成版`go-boundary-checker`: https://github.com/Mtsubasa/go-boundary-checker
 
-## 現在の作業
+## checkpoint
 
-Core完成版と自動testは実装済みです。次に次の配布物へ分割します。
+参加者が開始するstarterと、講師による復旧用のcheckpointを次のbranchに用意しています。
 
 - `main`: 参加者が開始するstarter
 - `ex03-complete`: 関数を見つけて報告できるcheckpoint
 - `ex04-complete`: 境界値を抽出できるcheckpoint
 - `core-complete`: test値との照合まで完成したcheckpoint
+- `types-complete`: named constantとconstant expressionまで扱うExtra完成版
 
 参加者にはbranch切り替えを要求せず、checkpointは講師による復旧と進行の速い参加者向けに使います。
