@@ -1,6 +1,6 @@
 package shipping
 
-const boundary = 5000
+var boundary = 5000
 
 func NamedConstant(total int) int {
 	if total < boundary {

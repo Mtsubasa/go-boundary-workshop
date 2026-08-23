@@ -4,6 +4,7 @@ package boundary
 
 import (
 	"go/ast"
+	"go/constant"
 	"go/token"
 	"path/filepath"
 	"strconv"
@@ -117,12 +118,7 @@ func collectBoundaries(pass *analysis.Pass, inspectResult *inspector.Inspector) 
 				return true
 			}
 
-			literal, ok := comparison.Y.(*ast.BasicLit)
-			if !ok || literal.Kind != token.INT {
-				return true
-			}
-
-			value, ok := integerLiteralValue(literal)
+			value, pos, ok := integerConstantValue(pass, comparison.Y)
 			if !ok {
 				return true
 			}
@@ -130,7 +126,7 @@ func collectBoundaries(pass *analysis.Pass, inspectResult *inspector.Inspector) 
 			boundaries = append(boundaries, boundaryInfo{
 				functionName: function.Name.Name,
 				value:        value,
-				pos:          literal.Pos(),
+				pos:          pos,
 			})
 			return true
 		})
@@ -223,6 +219,24 @@ func integerLiteralValue(literal *ast.BasicLit) (int64, bool) {
 		return 0, false
 	}
 	return value, true
+}
+
+func integerConstantValue(pass *analysis.Pass, expression ast.Expr) (int64, token.Pos, bool) {
+	if literal, ok := expression.(*ast.BasicLit); ok && literal.Kind == token.INT {
+		value, ok := integerLiteralValue(literal)
+		return value, literal.Pos(), ok
+	}
+
+	typeAndValue, ok := pass.TypesInfo.Types[expression]
+	if !ok || typeAndValue.Value == nil {
+		return 0, token.NoPos, false
+	}
+
+	value, exact := constant.Int64Val(typeAndValue.Value)
+	if !exact {
+		return 0, token.NoPos, false
+	}
+	return value, expression.Pos(), true
 }
 
 func classifyInputs(inputs []int64, boundary int64) (less, equal, greater bool) {

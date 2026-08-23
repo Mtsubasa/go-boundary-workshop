@@ -2,6 +2,7 @@ package boundary
 
 import (
 	"go/ast"
+	"go/importer"
 	"go/parser"
 	"go/token"
 	"go/types"
@@ -47,6 +48,22 @@ func TestAnalyzer(t *testing.T) {
 		},
 		{
 			name: "unsupported",
+			want: nil,
+		},
+		{
+			name: "named_constant_missing",
+			want: []string{"ShippingFee: boundary value 5000 is not tested"},
+		},
+		{
+			name: "named_constant_complete",
+			want: nil,
+		},
+		{
+			name: "constant_expression",
+			want: []string{"ShippingFee: boundary value 5000 is not tested"},
+		},
+		{
+			name: "runtime_variable",
 			want: nil,
 		},
 	}
@@ -141,13 +158,23 @@ func runOnFixture(t *testing.T, fixtureName string) []string {
 		files = append(files, file)
 	}
 
+	typesInfo := &types.Info{
+		Types: make(map[ast.Expr]types.TypeAndValue),
+	}
+	typesConfig := &types.Config{Importer: importer.Default()}
+	typesPackage, err := typesConfig.Check("example.com/shipping", fileSet, files, typesInfo)
+	if err != nil {
+		t.Fatalf("type-check fixture: %v", err)
+	}
+
 	inspectResult := inspector.New(files)
 	var diagnostics []string
 	pass := &analysis.Pass{
-		Analyzer: Analyzer,
-		Fset:     fileSet,
-		Files:    files,
-		Pkg:      types.NewPackage("example.com/shipping", "shipping"),
+		Analyzer:  Analyzer,
+		Fset:      fileSet,
+		Files:     files,
+		Pkg:       typesPackage,
+		TypesInfo: typesInfo,
 		ResultOf: map[*analysis.Analyzer]any{
 			inspect.Analyzer: inspectResult,
 		},

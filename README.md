@@ -2,7 +2,7 @@
 
 Go Conference 2026「こだわりを静的解析で表現しよう 90分で作って動かす自作analyzer入門」のハンズオン用リポジトリです。
 
-> Status: Core完成版を実装済み。現在はハンズオン用のstarterとcheckpointへ分割する段階です。
+> この`types-complete` branchは、Coreへnamed constant対応を加えたExtra完成版です。
 
 ## このWorkshopで作るもの
 
@@ -95,11 +95,18 @@ go run ./cmd/astdump 'total < 5000'
 
 複合条件、named constant、変数境界、他の比較演算子、複数引数、external test packageはExtraまたは完成版で扱います。
 
+このbranchではExtra 1として、named constantとconstant expressionを`TypesInfo`と`go/constant`で評価します。実行時に値が変わり得る一般変数は対象外です。
+
+```bash
+go run ./cmd/boundary ./examples/shippingconst
+```
+
 詳細は次の文書を参照してください。
 
 - [Workshop Spec](docs/WORKSHOP_SPEC.md): Coreの対応範囲と成功条件
 - [Exercise Drafts](docs/exercises/README.md): Zenn本へ展開する参加者向け手順
 - [Core Walkthrough](docs/CORE_WALKTHROUGH.md): 実装と切り出しの講師用解説
+- [Types Extra Walkthrough](docs/TYPES_EXTRA_WALKTHROUGH.md): named constantと一般変数の境界
 - [Demo Script](docs/DEMO_SCRIPT.md): 80〜90分の完全版demo台本
 
 ## 参加前の準備
@@ -133,5 +140,6 @@ Core完成版と自動testは実装済みです。次に次の配布物へ分割
 - `ex03-complete`: 関数を見つけて報告できるcheckpoint
 - `ex04-complete`: 境界値を抽出できるcheckpoint
 - `core-complete`: test値との照合まで完成したcheckpoint
+- `types-complete`: named constantとconstant expressionまで扱うExtra完成版
 
 参加者にはbranch切り替えを要求せず、checkpointは講師による復旧と進行の速い参加者向けに使います。
