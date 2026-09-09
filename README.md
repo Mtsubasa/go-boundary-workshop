@@ -1,5 +1,7 @@
 # go-boundary-workshop
 
+> この`ex04-complete` branchはStep 2の復旧用checkpointです。通常のWorkshopは`main` branchから開始します。この状態を利用する場合は[Recovery Guide](docs/04-RECOVERY.md)の手順で必要なfileだけ復元してください。
+
 GoのASTを使い、境界値のtest case不足を検出する`analysis.Analyzer`を実装するためのrepositoryです。
 
 当日は、[Zenn本](https://zenn.dev/tsubasa_m/books/go-static-analysis-workshop)を**主手順書**として読みながら、このrepositoryのcodeを編集します。
