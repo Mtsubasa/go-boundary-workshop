@@ -117,6 +117,7 @@ go run ./cmd/astdump 'total < 5000'
 - [Exercise Drafts](docs/exercises/README.md): Zenn本へ展開する参加者向け手順
 - [Core Walkthrough](docs/CORE_WALKTHROUGH.md): 実装と切り出しの講師用解説
 - [Demo Script](docs/DEMO_SCRIPT.md): 80〜90分の完全版demo台本
+- [CI Integration](docs/CI_INTEGRATION.md): local実行からGitHub Actionsへ組み込む手順
 - [Rehearsal Runbook](docs/REHEARSAL_RUNBOOK.md): 90分全体の進行、短縮判断、復旧手順
 - [Rehearsal Log Template](docs/REHEARSAL_LOG_TEMPLATE.md): リハーサル結果の記録用template
 
