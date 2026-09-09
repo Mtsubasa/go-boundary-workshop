@@ -29,7 +29,7 @@ func run(pass *analysis.Pass) (any, error) {
 		return nil, nil
 	}
 
-	// TODO(Ex3): Find function declarations and report their names.
+	// TODO(Step 1): Find function declarations and report their names.
 	_ = inspectResult
 
 	return nil, nil

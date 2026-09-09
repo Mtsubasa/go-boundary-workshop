@@ -1,6 +1,8 @@
 # 02. CI Integration
 
-実装した`analysis.Analyzer`は、CLIとしての直接実行に加え、`go vet`のcustom toolとしてCIから実行できます。以下の例は`core-complete` branch相当の実装を前提とします。
+この内容はCore完了後のOptionalです。実装した`analysis.Analyzer`は、CLIとしての直接実行に加え、`go vet`のcustom toolとしてCIから実行できます。以下の例は`core-complete` branch相当の実装を前提とします。
+
+Workshop当日に時間が限られる場合は、「localで動作を確認する」までをdemoし、GitHub Actionsはworkflowの構造を説明するだけで十分です。workflowの作成、push、実行待ちは必須作業に含めません。
 
 ## localで動作を確認する
 
@@ -24,7 +26,7 @@ examples/shipping/shipping.go:4:13: ShippingFee: boundary value 5000 is not test
 
 ## GitHub Actionsで実行する
 
-`.github/workflows/boundary-check.yml`を作成します。
+自分のrepositoryへ導入する場合は、`.github/workflows/boundary-check.yml`を作成します。
 
 ```yaml
 name: Boundary check
@@ -62,6 +64,8 @@ jobs:
 ```
 
 `go test`と静的解析は異なる観点を確認するため、別々のstepとして実行します。
+
+`go vet -vettool`は、診断があると非0で終了します。その終了statusをGitHub Actionsが受け取り、`Check boundary test cases` stepを失敗として表示します。
 
 ## CIの結果を読む
 
