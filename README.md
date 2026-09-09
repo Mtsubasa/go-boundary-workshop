@@ -139,6 +139,15 @@ Step 2以降は、Zenn本に掲載されたcodeを同じfileへ段階的に追�
 git diff main..ex03-complete -- boundary/analyzer.go
 ```
 
+作業を壊してしまった場合は、変更をstashへ保存してから、対応するcheckpointの`boundary/analyzer.go`だけを復元できます。
+
+```bash
+git stash push -u -m "workshop: before recovery"
+git restore --source=ex03-complete -- boundary/analyzer.go
+```
+
+Step 1〜Types Extraまでの復元command、元の作業をstashから戻す方法は[Recovery Guide](docs/04-RECOVERY.md)を参照してください。
+
 ## ASTを表示する補助command
 
 browserを使わず、式のASTをterminalへ表示できます。
@@ -154,6 +163,7 @@ go run ./cmd/astdump "total < 5000"
 1. [Analyzer Architecture](docs/01-ANALYZER_ARCHITECTURE.md): analyzerの処理構造
 2. [CI Integration](docs/02-CI_INTEGRATION.md): `go vet`とGitHub Actionsへの組み込み
 3. [AST・Types・CI Deep Dive](docs/03-AST_TYPES_CI_DEEP_DIVE.md): ASTからCIまでの仕組みとFAQ
+4. [Recovery Guide](docs/04-RECOVERY.md): Stepごとのcheckpointから安全に復元する方法
 
 ## 関連リンク
 
