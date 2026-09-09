@@ -296,7 +296,7 @@ stepを分けると、CI画面だけで失敗理由を判別できます。
 
 Go commandのpackage patternでは、`testdata`という名前のdirectoryは通常のpackage探索から除外されます。そのため、CIの`./...`が`boundary/testdata/*`を直接解析するわけではありません。
 
-`boundary/testdata`は`analyzer_workshop_test.go`が明示的にfileを読み、Analyzerへ渡すfixtureです。実projectを検査する`go vet`と、Analyzer自身を検査するfixture testは別の経路です。
+`boundary/testdata`は`boundary` packageのanalyzer testが明示的にfileを読み、Analyzerへ渡すfixtureです。実projectを検査する`go vet`と、Analyzer自身を検査するfixture testは別の経路です。
 
 ### CIで診断が出たら何が起こるか
 
