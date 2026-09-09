@@ -129,7 +129,7 @@ go run ./cmd/astdump 'total < 5000'
 開催前に、次が成功することを確認してください。
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Mtsubasa/go-boundary-workshop.git
 cd go-boundary-workshop
 go test ./...
 ```
@@ -140,8 +140,8 @@ Gitの詳しい操作、GitHub account、ASTや静的解析の事前知識は必
 
 ## 教材
 
-- Zenn本: 公開後にlinkを追加
-- 登壇資料: 公開後にlinkを追加
+- Zenn本: https://zenn.dev/tsubasa_m/books/go-static-analysis-workshop（公開準備中）
+- 登壇資料: Workshop当日に案内予定
 - 完成版`go-boundary-checker`: https://github.com/Mtsubasa/go-boundary-checker
 
 ## checkpoint

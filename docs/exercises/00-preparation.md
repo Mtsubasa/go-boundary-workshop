@@ -14,7 +14,7 @@ GitHub account、ASTや静的解析の知識、特定のeditorは必要ありま
 ## repositoryを取得する
 
 ```bash
-git clone <公開後にURLを記載>
+git clone https://github.com/Mtsubasa/go-boundary-workshop.git
 cd go-boundary-workshop
 go mod download
 go test ./...
@@ -33,4 +33,3 @@ go env GOMOD
 ```
 
 当日は講師が復旧用ZIPを用意します。通常はbranch操作をせず、cloneしたworking treeのままExerciseを進めます。
-
