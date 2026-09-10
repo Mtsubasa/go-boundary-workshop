@@ -37,6 +37,7 @@ func run(pass *analysis.Pass) (any, error) {
 			return
 		}
 
+		// TODO(Step 2): この確認用メッセージをast.Inspectへ置き換える。
 		pass.Reportf(function.Name.Pos(), "found function %s", function.Name.Name)
 	})
 
