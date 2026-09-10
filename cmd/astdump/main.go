@@ -1,4 +1,4 @@
-// Command astdump prints the AST of one Go expression.
+// Command astdumpは、1つのGoの式をASTとして表示します。
 package main
 
 import (
