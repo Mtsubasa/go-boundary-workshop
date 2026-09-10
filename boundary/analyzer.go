@@ -29,7 +29,8 @@ func run(pass *analysis.Pass) (any, error) {
 		return nil, nil
 	}
 
-	// TODO(Step 1): 関数宣言を探し、関数名を表示する。
+	// TODO(Step 1): ZennのStep 1にあるPreorderをここへ追加する。
+	// function := node.(*ast.XXXX)のXXXXを書き換えて完成させる。
 	_ = inspectResult
 
 	return nil, nil
