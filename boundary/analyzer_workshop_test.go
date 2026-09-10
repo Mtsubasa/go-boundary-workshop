@@ -19,7 +19,7 @@ import (
 )
 
 // TestAnalyzer is excluded from the preflight test by the build tag above.
-// Participants enable it in Step 4 after completing the Core implementation.
+// Participants enable it as an optional exercise after completing Step 3.
 func TestAnalyzer(t *testing.T) {
 	tests := []struct {
 		name string
