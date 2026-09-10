@@ -1,4 +1,4 @@
-// Package boundary provides the analyzer built during the workshop.
+// Package boundaryは、ワークショップで作成するanalyzerを提供します。
 package boundary
 
 import (
@@ -14,7 +14,7 @@ import (
 
 const doc = "check whether table-driven tests cover integer boundary values"
 
-// Analyzer is the analyzer completed step by step in the workshop.
+// AnalyzerはStep 2まで実装したanalyzerです。
 var Analyzer = &analysis.Analyzer{
 	Name: "boundary",
 	Doc:  doc,
@@ -66,9 +66,9 @@ func run(pass *analysis.Pass) (any, error) {
 	return nil, nil
 }
 
-// containsTestFile and isTestFile are provided boilerplate. The analysis
-// driver handles a package both without and with its test files. Workshop code
-// compares production and test code in the variant that contains both.
+// containsTestFileとisTestFileはあらかじめ用意した補助関数です。
+// analysisの実行側は、通常のパッケージとテストを含むパッケージをそれぞれ扱います。
+// 今回は、実装コードとテストコードを両方含む場合だけ解析を続けます。
 func containsTestFile(pass *analysis.Pass) bool {
 	for _, file := range pass.Files {
 		if isTestFile(pass, file.Pos()) {
