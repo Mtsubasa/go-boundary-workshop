@@ -52,7 +52,9 @@ examples/shipping/shipping.go:4:13: ShippingFee: boundary value 5000 is not test
 ├── scaffolds/
 │   ├── step1/analyzer.go.tmpl       # Step 1の穴埋め用コード
 │   ├── step2/analyzer.go.tmpl       # Step 2の穴埋め用コード
-│   └── step3a/analyzer.go.tmpl      # Step 3Aの穴埋め用コード
+│   ├── step3a/analyzer.go.tmpl      # Step 3Aの穴埋め用コード
+│   ├── step3b/analyzer.go.tmpl      # Step 3Bの穴埋め用コード
+│   └── step3c/analyzer.go.tmpl      # Step 3Cの穴埋め用コード
 ├── docs/                            # 構成・CIの補足資料
 ├── go.mod
 └── README.md
@@ -107,8 +109,8 @@ Step 3Cの完了後に確認するケースと個別の実行コマンドは、[
 | 1 | Step 1：関数を見つけて報告する | Step 1のテンプレートをコピーし、TODOを埋める | `go run ./cmd/boundary ./examples/shipping` |
 | 2 | Step 2：if文から境界値を抽出する | Step 2のテンプレートをコピーし、TODOを埋める | `go run ./cmd/boundary ./examples/shipping` |
 | 3A | Step 3A：テーブルテストから入力値を集める | Step 3Aのテンプレートをコピーし、ASTに関するTODOを埋める | `go run ./cmd/boundary ./examples/shipping` |
-| 3B | Step 3B：境界値とテスト値を分類する | 未満・境界値・超過に分類する | `go run ./cmd/boundary ./examples/shipping` |
-| 3C | Step 3C：不足を診断し、修正を確認する | 不足だけを診断し、テストケースを追加する | `go run ./cmd/boundary ./examples/shipping` |
+| 3B | Step 3B：境界値とテスト値を分類する | Step 3Bのテンプレートをコピーし、3分類の`switch`を書く | `go run ./cmd/boundary ./examples/shipping` |
+| 3C | Step 3C：不足を診断し、修正を確認する | Step 3Cのテンプレートをコピーし、境界値不足の診断を書く | `go run ./cmd/boundary ./examples/shipping` |
 | 応用課題1 | analyzer自身をテストする | 用意されたテストを実行する | `go test -tags=workshop_solution ./boundary` |
 | 応用課題2 | 比較式の左右を正規化する | `total < 5000`と`5000 > total`へ対応する | `go run ./cmd/boundary ./examples/shipping` |
 | 応用課題3 | 名前付き定数を型情報で評価する | ASTへ型情報を補い、定数を評価する | `go run ./cmd/boundary ./examples/shipping` |
@@ -129,6 +131,18 @@ Step 3Aも同じようにテンプレートをコピーします。コード量�
 
 ```bash
 cp scaffolds/step3a/analyzer.go.tmpl boundary/analyzer.go
+```
+
+Step 3Bでは、ASTから集めた数値を通常のGoの処理で分類します。テンプレートをコピーし、`classifyInputs`のTODOへ3分類の`switch`を書いてください。
+
+```bash
+cp scaffolds/step3b/analyzer.go.tmpl boundary/analyzer.go
+```
+
+Step 3Cでは、分類結果が`false`だった場合だけ診断します。テンプレートをコピーし、前後の診断を参考に境界値用の`pass.Reportf`を書いてください。
+
+```bash
+cp scaffolds/step3c/analyzer.go.tmpl boundary/analyzer.go
 ```
 
 ## ASTを表示する補助コマンド
