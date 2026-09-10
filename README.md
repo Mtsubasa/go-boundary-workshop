@@ -49,7 +49,10 @@ examples/shipping/shipping.go:4:13: ShippingFee: boundary value 5000 is not test
 ├── examples/shipping/
 │   ├── shipping.go                 # analyzerを実行する対象コード
 │   └── shipping_test.go            # Step 3Cで境界値を追加するテスト
-├── docs/                            # 構成・CI・復旧方法の補足資料
+├── scaffolds/
+│   ├── step1/analyzer.go.tmpl       # Step 1の穴埋め用コード
+│   └── step2/analyzer.go.tmpl       # Step 2の穴埋め用コード
+├── docs/                            # 構成・CIの補足資料
 ├── go.mod
 └── README.md
 ```
@@ -100,8 +103,8 @@ Step 3Cの完了後に確認するケースと個別の実行コマンドは、[
 | 順番 | Zenn本で読む章 | リポジトリで行うこと | 確認コマンド |
 |---|---|---|---|
 | 0 | ASTを見てみる | `cmd/astdump`で式の構造を見る | `go run ./cmd/astdump "total < 5000"` |
-| 1 | Step 1：関数を見つけて報告する | `boundary/analyzer.go`の`TODO(Step 1)`を実装する | `go run ./cmd/boundary ./examples/shipping` |
-| 2 | Step 2：if文から境界値を抽出する | Step 1のコードを境界値の抽出へ広げる | `go run ./cmd/boundary ./examples/shipping` |
+| 1 | Step 1：関数を見つけて報告する | Step 1のテンプレートをコピーし、TODOを埋める | `go run ./cmd/boundary ./examples/shipping` |
+| 2 | Step 2：if文から境界値を抽出する | Step 2のテンプレートをコピーし、TODOを埋める | `go run ./cmd/boundary ./examples/shipping` |
 | 3A | Step 3A：テーブルテストから入力値を集める | 実装コードとテストコードから値を集める | `go run ./cmd/boundary ./examples/shipping` |
 | 3B | Step 3B：境界値とテスト値を分類する | 未満・境界値・超過に分類する | `go run ./cmd/boundary ./examples/shipping` |
 | 3C | Step 3C：不足を診断し、修正を確認する | 不足だけを診断し、テストケースを追加する | `go run ./cmd/boundary ./examples/shipping` |
@@ -113,40 +116,13 @@ Step 3Cの完了後に確認するケースと個別の実行コマンドは、[
 
 4つの応用課題は互いに独立しています。残り時間や興味に合わせて、好きなものを1つ選びます。応用課題1は用意されたテストを実行するだけ、応用課題2は比較式の左右へ対応する実装、応用課題3は型情報を扱う難しめの実装、応用課題4は実行結果を分かりやすくする小さな実装です。
 
-Step 1の入口は[`boundary/analyzer.go`](boundary/analyzer.go)にあります。
-
-```go
-// TODO(Step 1): 関数宣言を探し、関数名を表示する。
-```
-
-Step 2以降は、Zenn本に掲載されたコードを同じファイルへ段階的に追加します。READMEだけを読んで完成コードをコピーするのではなく、各章の説明とASTを確認しながら進めてください。
-
-## 復旧用チェックポイント
-
-次のブランチは作業開始地点ではなく、途中で分からなくなった場合に差分を確認するためのチェックポイントです。通常は`main`ブランチのまま作業します。
-
-| ブランチ | 対応する完了地点 |
-|---|---|
-| `main` | analyzerの初期状態 |
-| `ex03-complete` | Step 1: 関数を検出して報告する実装 |
-| `ex04-complete` | Step 2: `if`文から境界値を抽出する実装 |
-| `step3-complete` | Step 3C：テスト値を照合して不足を診断する実装 |
-| `types-complete` | 応用課題3：名前付き定数と定数式へ対応した実装 |
-
-たとえばStep 1で詰まった場合は、完成チェックポイントとの差分を確認できます。
+Step 1では、最初に穴埋め用コードを`boundary/analyzer.go`へコピーします。
 
 ```bash
-git diff main..ex03-complete -- boundary/analyzer.go
+cp scaffolds/step1/analyzer.go.tmpl boundary/analyzer.go
 ```
 
-作業を壊してしまった場合は、変更をstashへ保存してから、対応するチェックポイントの`boundary/analyzer.go`だけを復元できます。
-
-```bash
-git stash push -u -m "workshop: before recovery"
-git restore --source=ex03-complete -- boundary/analyzer.go
-```
-
-Step 1から応用課題3までの復元コマンドと、元の作業をstashから戻す方法は[復旧手順](docs/03-RECOVERY.md)を参照してください。
+Step 2でも、対応する章の最初にテンプレートをコピーします。Zenn本でTODOの意図とASTを確認し、空いている部分を埋めてください。
 
 ## ASTを表示する補助コマンド
 
@@ -162,7 +138,6 @@ go run ./cmd/astdump "total < 5000"
 
 1. [Analyzerの構成](docs/01-ANALYZER_ARCHITECTURE.md)：analyzerの処理構造
 2. [CIへの組み込み](docs/02-CI_INTEGRATION.md)：`go vet`とGitHub Actionsへの組み込み
-3. [復旧手順](docs/03-RECOVERY.md)：Stepごとのチェックポイントから安全に復元する方法
 
 ## 関連リンク
 
