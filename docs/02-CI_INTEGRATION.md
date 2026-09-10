@@ -1,8 +1,8 @@
-# 02. CIへの組み込み
+# 02. 応用課題5：CIへの組み込み
 
-この内容はStep 3完了後の参考資料です。実装した`analysis.Analyzer`は、コマンドとしての直接実行に加え、`go vet`の追加ツールとしてCIから実行できます。以下の例は`step3-complete`ブランチ相当の実装を前提とします。
+この内容はStep 3C完了後の応用課題です。実装した`analysis.Analyzer`は、コマンドとしての直接実行に加え、`go vet`の追加ツールとしてCIから実行できます。
 
-ワークショップ当日に時間が限られる場合は、「手元で動作を確認する」ところまで進めます。GitHub Actionsのワークフロー作成、push、実行待ちは必須作業に含めません。
+GitHubへpushできるリポジトリがない場合は、「手元で動作を確認する」ところまでで完了として構いません。
 
 ## 手元で動作を確認する
 
@@ -18,24 +18,34 @@ go build -o boundary-checker ./cmd/boundary
 go vet -vettool="$(pwd)/boundary-checker" ./examples/shipping
 ```
 
-境界値5000がテーブルテストにない場合は、次のような診断を表示し、終了ステータスは0以外になります。
+Step 3Cで境界値5000を追加した状態では、何も表示せず終了ステータス0になります。
+
+失敗も確認する場合は、`examples/shipping/shipping_test.go`の5000を一時的にコメントアウトして同じコマンドを実行します。次のような診断を表示し、終了ステータスは0以外になります。
 
 ```text
 examples/shipping/shipping.go:4:13: ShippingFee: boundary value 5000 is not tested
 ```
 
+確認後は5000のケースを元に戻します。
+
 ## GitHub Actionsで実行する
 
-自分のリポジトリへ導入する場合は、`.github/workflows/boundary-check.yml`を作成します。
+自分のリポジトリへ導入する場合は、用意された設定を`.github/workflows`へコピーします。
+
+```bash
+mkdir -p .github/workflows
+cp ci/boundary-check.yml .github/workflows/boundary-check.yml
+```
+
+コピーされる内容は次のとおりです。
 
 ```yaml
 name: Boundary check
 
 on:
-  pull_request:
   push:
-    branches:
-      - main
+  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -60,10 +70,10 @@ jobs:
         run: go build -o "${RUNNER_TEMP}/boundary-checker" ./cmd/boundary
 
       - name: Check boundary test cases
-        run: go vet -vettool="${RUNNER_TEMP}/boundary-checker" ./...
+        run: go vet -vettool="${RUNNER_TEMP}/boundary-checker" ./examples/shipping
 ```
 
-`go test`と静的解析は異なる観点を確認するため、別々のStepとして実行します。
+`go test`と静的解析は異なる観点を確認するため、別々のStepとして実行します。解析対象を`./examples/shipping`へ限定しているのは、`boundary/testdata`に意図的な不足ケースが含まれているためです。
 
 `go vet -vettool`は、診断があると0以外で終了します。その終了ステータスをGitHub Actionsが受け取り、`Check boundary test cases`を失敗として表示します。
 

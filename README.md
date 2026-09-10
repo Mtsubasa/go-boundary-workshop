@@ -46,6 +46,8 @@ examples/shipping/shipping.go:4:13: ShippingFee: boundary value 5000 is not test
 ├── cmd/
 │   ├── astdump/main.go             # ASTをターミナルへ表示するコマンド
 │   └── boundary/main.go            # 作成するanalyzerのCLI入口
+├── ci/
+│   └── boundary-check.yml          # 応用課題5で使うGitHub Actions設定
 ├── examples/shipping/
 │   ├── shipping.go                 # analyzerを実行する対象コード
 │   └── shipping_test.go            # Step 3Cで境界値を追加するテスト
@@ -86,6 +88,7 @@ go run ./cmd/boundary ./examples/shipping
 | `go run ./cmd/boundary ./examples/shipping` | 実装中のanalyzerをサンプルコードへ実行 | 各Stepの完了時 |
 | `go test -cover ./examples/shipping` | カバレッジ100%と境界値不足を比較 | Step 3C |
 | `go test -tags=workshop_solution ./boundary` | 完成したanalyzerのテストを実行 | Step 3Cの完了後 |
+| `go vet -vettool="$(pwd)/boundary-checker" ./examples/shipping` | ビルドしたanalyzerを`go vet`から実行 | 応用課題5 |
 | `git status --short` | 自分が変更したファイルを確認 | 迷ったとき |
 | `git diff` | 自分が加えた変更内容を確認 | 迷ったとき |
 
@@ -112,12 +115,13 @@ Step 3Cの完了後に確認するケースと個別の実行コマンドは、[
 | 3B | Step 3B：境界値とテスト値を分類する | Step 3Bのテンプレートをコピーし、3分類の`switch`を書く | `go run ./cmd/boundary ./examples/shipping` |
 | 3C | Step 3C：不足を診断し、修正を確認する | Step 3Cのテンプレートをコピーし、境界値不足の診断を書く | `go run ./cmd/boundary ./examples/shipping` |
 | 応用課題1 | analyzer自身をテストする | 用意されたテストを実行する | `go test -tags=workshop_solution ./boundary` |
-| 応用課題2 | 比較式の左右を正規化する | `total < 5000`と`5000 > total`へ対応する | `go run ./cmd/boundary ./examples/shipping` |
+| 応用課題2 | 比較式の左右に対応する | `total < 5000`と`5000 > total`へ対応する | `go run ./cmd/boundary ./examples/shipping` |
 | 応用課題3 | 名前付き定数を型情報で評価する | ASTへ型情報を補い、定数を評価する | `go run ./cmd/boundary ./examples/shipping` |
 | 応用課題4 | 成功メッセージを表示する | 診断の有無を記録し、問題がなければ結果を表示する | `go run ./cmd/boundary ./examples/shipping` |
-| 参考 | `go vet`・CI | 実行ファイルを`go vet`へ組み込み、CIへの接続を確認する | `docs/02-CI_INTEGRATION.md` |
+| 応用課題5 | `go vet`・CIへ組み込む | ローカルで`go vet`連携を確認し、GitHub Actionsの設定を作る | `go vet -vettool="$(pwd)/boundary-checker" ./examples/shipping` |
+| 応用課題6 | ほかの比較演算子へ対応する | `<=`、`>`、`>=`も境界値を持つ比較として扱う | `go run ./cmd/boundary ./examples/shipping` |
 
-4つの応用課題は互いに独立しています。残り時間や興味に合わせて、好きなものを1つ選びます。応用課題1は用意されたテストを実行するだけ、応用課題2は比較式の左右へ対応する実装、応用課題3は型情報を扱う難しめの実装、応用課題4は実行結果を分かりやすくする小さな実装です。
+6つの応用課題は互いに独立しています。すべてStep 3Cを完了した状態から始め、残り時間や興味に合わせて好きなものを選びます。応用課題1は用意されたテストの実行、応用課題2は比較式の左右への対応、応用課題3は型情報を使う難しめの実装、応用課題4は成功メッセージの表示、応用課題5は`go vet`とCIへの組み込み、応用課題6は比較演算子の拡張です。
 
 Step 1では、最初に穴埋め用コードを`boundary/analyzer.go`へコピーします。
 
