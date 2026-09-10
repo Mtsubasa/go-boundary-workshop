@@ -1,0 +1,230 @@
+// Package boundaryは、境界値の前後と境界値そのものがテーブルテストに
+// 含まれているかを確認するanalyzerを提供します。
+package boundary
+
+import (
+	"go/ast"
+	"go/token"
+	"path/filepath"
+	"strconv"
+	"strings"
+
+	"golang.org/x/tools/go/analysis"
+	"golang.org/x/tools/go/analysis/passes/inspect"
+	"golang.org/x/tools/go/ast/inspector"
+)
+
+const doc = "check whether table-driven tests cover integer boundary values"
+
+// Analyzerは、ワークショップで扱う構文に対象を絞って解析します。
+// 対応する構文はリポジトリのREADMEに記載しています。
+var Analyzer = &analysis.Analyzer{
+	Name: "boundary",
+	Doc:  doc,
+	Run:  run,
+	Requires: []*analysis.Analyzer{
+		inspect.Analyzer,
+	},
+}
+
+type boundaryInfo struct {
+	// 実装側の関数名をキーにして、後でテスト入力と対応づける。
+	functionName string
+	// 比較式の右辺に書かれた境界値。
+	value        int64
+	// 最後にメッセージを表示するソースコード上の位置。
+	pos          token.Pos
+}
+
+// runは、実装コードの境界値とテストコードの入力値を関数名で対応づけます。
+func run(pass *analysis.Pass) (any, error) {
+	inspectResult := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
+	if !containsTestFile(pass) {
+		return nil, nil
+	}
+
+	// 実装コードとテストコードを別々に読み取り、関数名で結びつける。
+	boundaries := collectBoundaries(pass, inspectResult)
+	testInputs := collectTestInputs(pass, inspectResult)
+
+	for _, boundary := range boundaries {
+		inputs, ok := testInputs[boundary.functionName]
+		if !ok {
+			continue
+		}
+		pass.Reportf(
+			boundary.pos,
+			"%s: test inputs=%v",
+			boundary.functionName,
+			inputs,
+		)
+	}
+
+	return nil, nil
+}
+
+// collectBoundariesは、実装コードから関数名・境界値・位置を集めます。
+func collectBoundaries(pass *analysis.Pass, inspectResult *inspector.Inspector) []boundaryInfo {
+	var boundaries []boundaryInfo
+	nodeFilter := []ast.Node{(*ast.FuncDecl)(nil)}
+
+	inspectResult.Preorder(nodeFilter, func(node ast.Node) {
+		function := node.(*ast.FuncDecl)
+		if isTestFile(pass, function.Pos()) || function.Body == nil {
+			return
+		}
+
+		parameterName, ok := intParameterName(function)
+		if !ok {
+			return
+		}
+
+		ast.Inspect(function.Body, func(node ast.Node) bool {
+			if _, ok := node.(*ast.FuncLit); ok {
+				// 内側の関数リテラルにある条件式は、外側の関数の境界値として扱いません。
+				return false
+			}
+
+			ifStatement, ok := node.(*ast.IfStmt)
+			if !ok {
+				return true
+			}
+
+			comparison, ok := ifStatement.Cond.(*ast.BinaryExpr)
+			if !ok || comparison.Op != token.LSS {
+				return true
+			}
+
+			// comparison.Xには比較式の左辺totalが入っている。
+			left, ok := comparison.X.(*ast.XXXX) // TODO(Step 3A): 左辺を識別子として取り出す
+			if !ok || left.Name != parameterName {
+				return true
+			}
+
+			literal, ok := comparison.Y.(*ast.BasicLit)
+			if !ok || literal.Kind != token.INT {
+				return true
+			}
+
+			value, ok := integerLiteralValue(literal)
+			if !ok {
+				return true
+			}
+
+			boundaries = append(boundaries, boundaryInfo{
+				functionName: function.Name.Name,
+				value:        value,
+				pos:          literal.Pos(),
+			})
+			return true
+		})
+	})
+
+	return boundaries
+}
+
+// collectTestInputsは、Test<関数名>からinputフィールドの値を集めます。
+func collectTestInputs(pass *analysis.Pass, inspectResult *inspector.Inspector) map[string][]int64 {
+	// キーを実装側の関数名、値をその関数のテスト入力とするmap。
+	testInputs := make(map[string][]int64)
+	nodeFilter := []ast.Node{(*ast.FuncDecl)(nil)}
+
+	inspectResult.Preorder(nodeFilter, func(node ast.Node) {
+		function := node.(*ast.FuncDecl)
+		if !isTestFile(pass, function.Pos()) || function.Body == nil {
+			return
+		}
+		if function.Recv != nil || !strings.HasPrefix(function.Name.Name, "Test") {
+			return
+		}
+
+		// TestShippingFeeからTestを取り除き、ShippingFeeへ対応づける。
+		productionFunctionName := strings.TrimPrefix(function.Name.Name, "Test")
+		if productionFunctionName == "" {
+			return
+		}
+
+		// 入力値がなくても、テスト関数が存在したことは記録します。
+		if _, ok := testInputs[productionFunctionName]; !ok {
+			testInputs[productionFunctionName] = nil
+		}
+
+		ast.Inspect(function.Body, func(node ast.Node) bool {
+			// input: 4999のようなキーと値の組を探す。
+			keyValue, ok := node.(*ast.XXXX) // TODO(Step 3A): キーと値の組として取り出す
+			if !ok {
+				return true
+			}
+
+			// keyValue.Keyにはinputが入っている。
+			key, ok := keyValue.Key.(*ast.XXXX) // TODO(Step 3A): キーを識別子として取り出す
+			if !ok || key.Name != "input" {
+				return true
+			}
+
+			// keyValue.Valueには4999のような入力値が入っている。
+			literal, ok := keyValue.Value.(*ast.XXXX) // TODO(Step 3A): 値を基本リテラルとして取り出す
+			if !ok || literal.Kind != token.INT {
+				return true
+			}
+
+			value, ok := integerLiteralValue(literal)
+			if !ok {
+				return true
+			}
+
+			testInputs[productionFunctionName] = append(
+				testInputs[productionFunctionName],
+				value,
+			)
+			return true
+		})
+	})
+
+	return testInputs
+}
+
+// intParameterNameは、対象とする関数のint型パラメータ名を返します。
+func intParameterName(function *ast.FuncDecl) (string, bool) {
+	if function.Recv != nil || function.Type.Params == nil {
+		return "", false
+	}
+	if len(function.Type.Params.List) != 1 {
+		return "", false
+	}
+
+	parameter := function.Type.Params.List[0]
+	if len(parameter.Names) != 1 {
+		return "", false
+	}
+
+	parameterType, ok := parameter.Type.(*ast.Ident)
+	if !ok || parameterType.Name != "int" {
+		return "", false
+	}
+
+	return parameter.Names[0].Name, true
+}
+
+// integerLiteralValueは、リテラルの文字列を比較可能なint64へ変換します。
+func integerLiteralValue(literal *ast.BasicLit) (int64, bool) {
+	value, err := strconv.ParseInt(literal.Value, 0, 64)
+	if err != nil {
+		return 0, false
+	}
+	return value, true
+}
+
+func containsTestFile(pass *analysis.Pass) bool {
+	for _, file := range pass.Files {
+		if isTestFile(pass, file.Pos()) {
+			return true
+		}
+	}
+	return false
+}
+
+func isTestFile(pass *analysis.Pass, pos token.Pos) bool {
+	filename := pass.Fset.PositionFor(pos, false).Filename
+	return strings.HasSuffix(filepath.Base(filename), "_test.go")
+}
