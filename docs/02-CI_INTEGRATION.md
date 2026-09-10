@@ -1,24 +1,24 @@
-# 02. CI Integration
+# 02. CIへの組み込み
 
-この内容はCore完了後のOptionalです。実装した`analysis.Analyzer`は、CLIとしての直接実行に加え、`go vet`のcustom toolとしてCIから実行できます。以下の例は`core-complete` branch相当の実装を前提とします。
+この内容はStep 3完了後の参考資料です。実装した`analysis.Analyzer`は、コマンドとしての直接実行に加え、`go vet`の追加ツールとしてCIから実行できます。以下の例は`step3-complete`ブランチ相当の実装を前提とします。
 
-Workshop当日に時間が限られる場合は、「localで動作を確認する」までをdemoし、GitHub Actionsはworkflowの構造を説明するだけで十分です。workflowの作成、push、実行待ちは必須作業に含めません。
+ワークショップ当日に時間が限られる場合は、「手元で動作を確認する」ところまで進めます。GitHub Actionsのワークフロー作成、push、実行待ちは必須作業に含めません。
 
-## localで動作を確認する
+## 手元で動作を確認する
 
-analyzerをbuildします。
+analyzerをビルドします。
 
 ```bash
 go build -o boundary-checker ./cmd/boundary
 ```
 
-buildしたbinaryを`go vet`へ渡します。
+ビルドした実行ファイルを`go vet`へ渡します。
 
 ```bash
 go vet -vettool="$(pwd)/boundary-checker" ./examples/shipping
 ```
 
-境界値5000がtest tableにない場合は、次のような診断と0以外の終了statusになります。
+境界値5000がテーブルテストにない場合は、次のような診断を表示し、終了ステータスは0以外になります。
 
 ```text
 examples/shipping/shipping.go:4:13: ShippingFee: boundary value 5000 is not tested
@@ -26,7 +26,7 @@ examples/shipping/shipping.go:4:13: ShippingFee: boundary value 5000 is not test
 
 ## GitHub Actionsで実行する
 
-自分のrepositoryへ導入する場合は、`.github/workflows/boundary-check.yml`を作成します。
+自分のリポジトリへ導入する場合は、`.github/workflows/boundary-check.yml`を作成します。
 
 ```yaml
 name: Boundary check
@@ -63,21 +63,21 @@ jobs:
         run: go vet -vettool="${RUNNER_TEMP}/boundary-checker" ./...
 ```
 
-`go test`と静的解析は異なる観点を確認するため、別々のstepとして実行します。
+`go test`と静的解析は異なる観点を確認するため、別々のStepとして実行します。
 
-`go vet -vettool`は、診断があると非0で終了します。その終了statusをGitHub Actionsが受け取り、`Check boundary test cases` stepを失敗として表示します。
+`go vet -vettool`は、診断があると0以外で終了します。その終了ステータスをGitHub Actionsが受け取り、`Check boundary test cases`を失敗として表示します。
 
 ## CIの結果を読む
 
 | 結果 | 意味 |
 |---|---|
-| `Run tests`が失敗 | 通常のtestが失敗している |
-| `Check boundary test cases`が失敗 | analyzerが境界値caseの不足を診断した |
-| 両方成功 | 通常testと静的ruleの両方を通過した |
+| `Run tests`が失敗 | 通常のテストが失敗している |
+| `Check boundary test cases`が失敗 | analyzerが境界値ケースの不足を診断した |
+| 両方成功 | 通常のテストと静的解析の両方を通過した |
 
-## 別のrepositoryへ組み込む
+## 別のリポジトリへ組み込む
 
-directory構成に合わせて、analyzer CLIのpackageと解析対象のpackage patternを変更します。
+ディレクトリ構成に合わせて、analyzerのパッケージと解析対象のパッケージパターンを変更します。
 
 ```yaml
 - name: Build project analyzer

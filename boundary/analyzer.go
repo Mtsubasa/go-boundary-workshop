@@ -1,5 +1,5 @@
-// Package boundary provides an analyzer that checks whether table-driven tests
-// contain values on both sides of an integer boundary and the boundary itself.
+// Package boundaryは、境界値の前後と境界値そのものがテーブルテストに
+// 含まれているかを確認するanalyzerを提供します。
 package boundary
 
 import (
@@ -16,8 +16,8 @@ import (
 
 const doc = "check whether table-driven tests cover integer boundary values"
 
-// Analyzer checks the deliberately narrow syntax used by the workshop's Core
-// exercise. See the repository README for the supported syntax.
+// Analyzerは、ワークショップで扱う構文に対象を絞って解析します。
+// 対応する構文はリポジトリのREADMEに記載しています。
 var Analyzer = &analysis.Analyzer{
 	Name: "boundary",
 	Doc:  doc,
@@ -38,9 +38,8 @@ func run(pass *analysis.Pass) (any, error) {
 
 	testInputs := collectTestInputs(pass, inspectResult)
 	if len(testInputs) == 0 {
-		// The analysis driver also runs this analyzer for a package variant that
-		// does not contain test files. Only the variant containing both production
-		// and test files has enough information to compare their values.
+		// analysisの実行側は、テストファイルを含まないパッケージにもanalyzerを実行します。
+		// 実装コードとテストコードの両方が揃う場合だけ値を照合します。
 		return nil, nil
 	}
 
@@ -90,15 +89,14 @@ func collectBoundaries(pass *analysis.Pass, inspectResult *inspector.Inspector) 
 			return
 		}
 
-		parameterName, ok := coreParameterName(function)
+		parameterName, ok := intParameterName(function)
 		if !ok {
 			return
 		}
 
 		ast.Inspect(function.Body, func(node ast.Node) bool {
 			if _, ok := node.(*ast.FuncLit); ok {
-				// A condition in a nested function literal does not belong to the
-				// surrounding function.
+				// 内側の関数リテラルにある条件式は、外側の関数の境界値として扱いません。
 				return false
 			}
 
@@ -157,9 +155,8 @@ func collectTestInputs(pass *analysis.Pass, inspectResult *inspector.Inspector) 
 			return
 		}
 
-		// Keep an entry even when no supported input literal is found. A matching
-		// test function with an empty/unsupported table is still missing all
-		// three classes of values.
+		// 対応する入力値がなくても、テスト関数が存在したことは記録します。
+		// 空のテーブルでは3分類すべてが不足しているためです。
 		if _, ok := testInputs[productionFunctionName]; !ok {
 			testInputs[productionFunctionName] = nil
 		}
@@ -196,7 +193,7 @@ func collectTestInputs(pass *analysis.Pass, inspectResult *inspector.Inspector) 
 	return testInputs
 }
 
-func coreParameterName(function *ast.FuncDecl) (string, bool) {
+func intParameterName(function *ast.FuncDecl) (string, bool) {
 	if function.Recv != nil || function.Type.Params == nil {
 		return "", false
 	}
