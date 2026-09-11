@@ -41,6 +41,7 @@ examples/shipping/shipping.go:4:13: ShippingFee: boundary value 5000 is not test
 .
 ├── boundary/
 │   ├── analyzer.go                 # Step 1〜3で実装するファイル
+│   ├── support.go                  # ワークショップでは変更しない補助処理
 │   ├── analyzer_workshop_test.go   # 完成したanalyzer用のテスト
 │   └── testdata/                   # analyzerテストの入力コードと期待値一覧
 ├── cmd/
@@ -54,7 +55,8 @@ examples/shipping/shipping.go:4:13: ShippingFee: boundary value 5000 is not test
 ├── scaffolds/
 │   ├── step1/analyzer.go.tmpl       # Step 1の穴埋め用コード
 │   ├── step2/analyzer.go.tmpl       # Step 2の穴埋め用コード
-│   ├── step3a/analyzer.go.tmpl      # Step 3Aの穴埋め用コード
+│   ├── step3a-boundary/              # Step 3A前半：境界値を集める
+│   ├── step3a/analyzer.go.tmpl      # Step 3A後半：テスト入力を集める
 │   ├── step3b/analyzer.go.tmpl      # Step 3Bの穴埋め用コード
 │   └── step3c/analyzer.go.tmpl      # Step 3Cの穴埋め用コード
 ├── docs/                            # 構成・CIの補足資料
@@ -111,7 +113,7 @@ Step 3Cの完了後に確認するケースと個別の実行コマンドは、[
 | 0 | ASTを見てみる | `cmd/astdump`で式の構造を見る | `go run ./cmd/astdump "total < 5000"` |
 | 1 | Step 1：関数を見つけて報告する | Step 1のテンプレートをコピーし、TODOを埋める | `go run ./cmd/boundary ./examples/shipping` |
 | 2 | Step 2：if文から境界値を抽出する | Step 2のテンプレートをコピーし、TODOを埋める | `go run ./cmd/boundary ./examples/shipping` |
-| 3A | Step 3A：テーブルテストから入力値を集める | Step 3Aのテンプレートをコピーし、ASTに関するTODOを埋める | `go run ./cmd/boundary ./examples/shipping` |
+| 3A | Step 3A：テーブルテストから入力値を集める | 前半と後半のテンプレートを順にコピーし、それぞれ実行する | `go run ./cmd/boundary ./examples/shipping` |
 | 3B | Step 3B：境界値とテスト値を分類する | Step 3Bのテンプレートをコピーし、3分類の`switch`を書く | `go run ./cmd/boundary ./examples/shipping` |
 | 3C | Step 3C：不足を診断し、修正を確認する | Step 3Cのテンプレートをコピーし、境界値不足の診断を書く | `go run ./cmd/boundary ./examples/shipping` |
 | 応用課題1 | analyzer自身をテストする | 用意されたテストを実行する | `go test -tags=workshop_solution ./boundary` |
@@ -131,7 +133,13 @@ cp scaffolds/step1/analyzer.go.tmpl boundary/analyzer.go
 
 Step 2でも、対応する章の最初にテンプレートをコピーします。Zenn本でTODOの意図とASTを確認し、空いている部分を埋めてください。
 
-Step 3Aも同じようにテンプレートをコピーします。コード量は増えますが、穴埋めはASTから値を取り出す4か所だけです。それ以外の処理は、コード内のコメントとZenn本の説明を読みながら流れを確認してください。
+Step 3Aは2つのチェックポイントに分けます。まず実装コードから境界値を集める1か所を埋め、実行結果を確認します。
+
+```bash
+cp scaffolds/step3a-boundary/analyzer.go.tmpl boundary/analyzer.go
+```
+
+続いて後半のテンプレートへ切り替え、テスト入力を取り出す3か所を埋めます。前半の完成状態は後半のテンプレートに含まれています。
 
 ```bash
 cp scaffolds/step3a/analyzer.go.tmpl boundary/analyzer.go

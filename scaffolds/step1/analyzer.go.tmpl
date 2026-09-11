@@ -3,9 +3,6 @@ package boundary
 
 import (
 	"go/ast"
-	"go/token"
-	"path/filepath"
-	"strings"
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
@@ -41,21 +38,4 @@ func run(pass *analysis.Pass) (any, error) {
 	})
 
 	return nil, nil
-}
-
-// containsTestFileとisTestFileはあらかじめ用意した補助関数です。
-// analysisの実行側は、通常のパッケージとテストを含むパッケージをそれぞれ扱います。
-// 今回は、実装コードとテストコードを両方含む場合だけ解析を続けます。
-func containsTestFile(pass *analysis.Pass) bool {
-	for _, file := range pass.Files {
-		if isTestFile(pass, file.Pos()) {
-			return true
-		}
-	}
-	return false
-}
-
-func isTestFile(pass *analysis.Pass, pos token.Pos) bool {
-	filename := pass.Fset.PositionFor(pos, false).Filename
-	return strings.HasSuffix(filepath.Base(filename), "_test.go")
 }

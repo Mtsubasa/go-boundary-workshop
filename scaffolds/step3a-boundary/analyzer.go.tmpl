@@ -5,7 +5,6 @@ package boundary
 import (
 	"go/ast"
 	"go/token"
-	"strings"
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
@@ -34,32 +33,19 @@ type boundaryInfo struct {
 	pos token.Pos
 }
 
-// runは、実装コードの境界値とテストコードの入力値を関数名で対応づけます。
+// runは、実装コードから集めた関数名と境界値を表示します。
 func run(pass *analysis.Pass) (any, error) {
 	inspectResult := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 	if !containsTestFile(pass) {
 		return nil, nil
 	}
 
-	testInputs := collectTestInputs(pass, inspectResult)
 	for _, boundary := range collectBoundaries(pass, inspectResult) {
-		inputs, hasTest := testInputs[boundary.functionName]
-		if !hasTest {
-			continue
-		}
-
-		// ASTから集めた数値を、通常のGoの処理で3つに分類する。
-		hasLess, hasBoundary, hasGreater := classifyInputs(
-			inputs,
-			boundary.value,
-		)
 		pass.Reportf(
 			boundary.pos,
-			"%s: less=%t boundary=%t greater=%t",
+			"%s: boundary value=%d",
 			boundary.functionName,
-			hasLess,
-			hasBoundary,
-			hasGreater,
+			boundary.value,
 		)
 	}
 
@@ -99,7 +85,7 @@ func collectBoundaries(pass *analysis.Pass, inspectResult *inspector.Inspector) 
 			}
 
 			// comparison.Xには比較式の左辺totalが入っている。
-			left, ok := comparison.X.(*ast.Ident)
+			left, ok := comparison.X.(*ast.XXXX) // TODO(Step 3A): 左辺を識別子として取り出す
 			if !ok || left.Name != parameterName {
 				return true
 			}
@@ -124,80 +110,4 @@ func collectBoundaries(pass *analysis.Pass, inspectResult *inspector.Inspector) 
 	})
 
 	return boundaries
-}
-
-// collectTestInputsは、Test<関数名>からinputフィールドの値を集めます。
-func collectTestInputs(pass *analysis.Pass, inspectResult *inspector.Inspector) map[string][]int64 {
-	// キーを実装側の関数名、値をその関数のテスト入力とするmap。
-	testInputs := make(map[string][]int64)
-	nodeFilter := []ast.Node{(*ast.FuncDecl)(nil)}
-
-	inspectResult.Preorder(nodeFilter, func(node ast.Node) {
-		function := node.(*ast.FuncDecl)
-		if !isTestFile(pass, function.Pos()) || function.Body == nil {
-			return
-		}
-		if function.Recv != nil || !strings.HasPrefix(function.Name.Name, "Test") {
-			return
-		}
-
-		// TestShippingFeeからTestを取り除き、ShippingFeeへ対応づける。
-		productionFunctionName := strings.TrimPrefix(function.Name.Name, "Test")
-		if productionFunctionName == "" {
-			return
-		}
-
-		// 入力値がなくても、テスト関数が存在したことは記録します。
-		if _, ok := testInputs[productionFunctionName]; !ok {
-			testInputs[productionFunctionName] = nil
-		}
-
-		ast.Inspect(function.Body, func(node ast.Node) bool {
-			// input: 4999のようなキーと値の組を探す。
-			keyValue, ok := node.(*ast.KeyValueExpr)
-			if !ok {
-				return true
-			}
-
-			// keyValue.Keyにはinputが入っている。
-			key, ok := keyValue.Key.(*ast.Ident)
-			if !ok || key.Name != "input" {
-				return true
-			}
-
-			// keyValue.Valueには4999のような入力値が入っている。
-			literal, ok := keyValue.Value.(*ast.BasicLit)
-			if !ok || literal.Kind != token.INT {
-				return true
-			}
-
-			value, ok := integerLiteralValue(literal)
-			if !ok {
-				return true
-			}
-
-			testInputs[productionFunctionName] = append(
-				testInputs[productionFunctionName],
-				value,
-			)
-			return true
-		})
-	})
-
-	return testInputs
-}
-
-
-// classifyInputsは、境界値との位置関係を3つの真偽値で返します。
-func classifyInputs(inputs []int64, boundary int64) (
-	less bool,
-	equal bool,
-	greater bool,
-) {
-	for _, input := range inputs {
-		// TODO(Step 3B): この行をswitchへ置き換え、inputをboundaryとの
-		// 位置関係で未満・境界値・超過に分類する。
-		_ = input
-	}
-	return less, equal, greater
 }
