@@ -77,6 +77,18 @@ go run ./cmd/boundary ./examples/shipping
 
 `main`ブランチはanalyzerの処理を実装する前の初期状態です。そのため、最初の`go run`は何も表示せずに終了します。これは正常な状態です。
 
+途中からclone直後の状態へ戻す場合は、次を実行します。
+
+```bash
+git restore boundary/analyzer.go examples/shipping/shipping_test.go
+```
+
+Step 1の穴埋めを始める状態へ切り替える場合は、Step 1のscaffoldをコピーします。
+
+```bash
+cp scaffolds/step1/analyzer.go.tmpl boundary/analyzer.go
+```
+
 準備ができたら、次の順番で進めます。
 
 ## 当日使うコマンド
