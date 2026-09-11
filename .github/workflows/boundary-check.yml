@@ -1,0 +1,31 @@
+name: Boundary check
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  boundary-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Build boundary checker
+        run: go build -o "${RUNNER_TEMP}/boundary-checker" ./cmd/boundary
+
+      - name: Check boundary test cases
+        run: go vet -vettool="${RUNNER_TEMP}/boundary-checker" ./examples/shipping

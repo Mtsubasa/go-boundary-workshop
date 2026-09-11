@@ -8,6 +8,7 @@ func TestShippingFee(t *testing.T) {
 		want  int
 	}{
 		{input: 4999, want: 500},
+		{input: 5000, want: 0},
 		{input: 5001, want: 0},
 	}
 
